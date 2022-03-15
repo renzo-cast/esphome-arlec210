@@ -1,0 +1,43 @@
+---
+
+esphome:
+  name: atrium
+  platform: ESP8266
+  board: nodemcuv2
+  includes:
+    - arlec_switch.h
+  libraries:
+    - "rc-switch"
+
+wifi:
+  networks:
+    - ssid: !secret wifi_ssid
+      password: !secret wifi_password
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+ password: !secret api_password
+
+# Enable OTA
+ota:
+ password: !secret api_password
+
+remote_receiver:
+  pin: D1
+  dump: rc_switch 
+
+# Individual switches
+switch:
+  - platform: custom
+    lambda: |-
+      unsigned long code_on = 3456769756; // "011001110000010100001111011011100";
+      unsigned long code_off = 3456769246; // "011001110000010100001110011011110";
+      auto arlec_switch = new ArlecSwitch(4, code_on, code_off, 33, 1);
+      App.register_component(arlec_switch);
+      return {arlec_switch};
+
+    switches:
+      name: "atrium"
